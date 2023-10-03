@@ -1,4 +1,9 @@
-use serde::{Deserialize};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize)]
+pub struct TotalRecordCount {
+    pub count:i64,
+}
 
 // the API for ArcGIS is kind of annoying–where the actual data we want is 
 //  a few layers down in the "features" layer. So we create a few different structs:
@@ -7,17 +12,17 @@ use serde::{Deserialize};
 //    * Crashes: This struct represents the attributes related to crashes. 
 //          Each attribute is annotated with serde rename attributes, which specify how the fields should be deserialized from JSON. 
 //          This struct defines the data structure for the crash-related attributes within each feature.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Feature {
     pub attributes: Crashes,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ApiResponse {
     pub features: Vec<Feature>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Crashes {
     #[serde(rename = "CRIMEID")]
     pub crime_id:String,

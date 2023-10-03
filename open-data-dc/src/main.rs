@@ -1,6 +1,8 @@
 use reqwest::Error;
 use serde_json::from_str;
-use open_data_dc::ApiResponse;
+// use std::fs::write;
+use open_data_dc::{ ApiResponse, TotalRecordCount} ;
+
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -13,7 +15,9 @@ async fn main() -> Result<(), Error> {
 
     let api_response: ApiResponse = from_str(&response_text).expect("Failed to parse");
 
-    print_output(api_response);
+    let json_string = serde_json::to_string(&api_response).expect("Failed to serialize to JSON");
+
+    // write("output.json", json_string).expect("Failed to write JSON to file");
 
     Ok(())
 }
@@ -81,4 +85,17 @@ fn print_output(a:ApiResponse) {
         println!("TOTAL CYCLISTS: {}", feature.attributes.total_bicycles);
         println!("--------------------------------------------");
     }
+}
+
+async fn get_total_record_count() -> Result<i64, Error> {
+    let url = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=*&returnCountOnly=true&outSR=4326&f=json";
+    
+    let response_text: String = reqwest::get(url)
+        .await?
+        .text()
+        .await?;
+
+    let json_resp: TotalRecordCount = from_str(&response_text).expect("Failed to parse");
+
+    Ok(json_resp.count)
 }
