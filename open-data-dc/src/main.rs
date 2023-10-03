@@ -1,7 +1,7 @@
 use reqwest::Error;
 use serde_json::from_str;
 // use std::fs::write;
-use open_data_dc::{ ApiResponse, TotalRecordCount} ;
+use open_data_dc::{ ApiResponse, TotalRecordCount };
 
 
 #[tokio::main]
