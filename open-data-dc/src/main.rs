@@ -13,15 +13,7 @@ async fn main() -> Result<(), Error> {
 
     let api_response: ApiResponse = from_str(&response_text).expect("Failed to parse");
 
-    for feature in api_response.features {
-        println!("CRIMEID: {}", feature.attributes.crime_id);
-        println!("REPORTDATE: {}", feature.attributes.report_date);
-        println!("ADDRESS: {}", feature.attributes.address);
-        println!("LATITUDE: {}", feature.attributes.latitude);
-        println!("LONGITUDE: {}", feature.attributes.longitude);
-        println!("TOTAL CYCLISTS: {}", feature.attributes.total_bicycles);
-        println!("--------------------------------------------");
-    }
+    print_output(api_response);
 
     Ok(())
 }
@@ -72,4 +64,17 @@ fn build_crashes_url() -> String {
     url.push_str("&returnGeometry=false&outSR=4326&f=json");
 
     url
+}
+
+fn print_output(a:ApiResponse) {
+    // look at a few of the features of the API Response
+    for feature in a.features {
+        println!("CRIMEID: {}", feature.attributes.crime_id);
+        println!("REPORTDATE: {}", feature.attributes.report_date);
+        println!("ADDRESS: {}", feature.attributes.address);
+        println!("LATITUDE: {}", feature.attributes.latitude);
+        println!("LONGITUDE: {}", feature.attributes.longitude);
+        println!("TOTAL CYCLISTS: {}", feature.attributes.total_bicycles);
+        println!("--------------------------------------------");
+    }
 }
