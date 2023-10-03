@@ -2,9 +2,11 @@ use serde::{Deserialize};
 
 // the API for ArcGIS is kind of annoying–where the actual data we want is 
 //  a few layers down in the "features" layer. So we create a few different structs:
-//    * a struct, Feature, containing the attributes we're interested in.
-//    * a struct containing the Crashes columns (Crashes), basically the attributes of each feature.
-//    * a struct containing the API Response, which is a vector of features.
+//    * Feature: This struct represents individual features from the API response and contains the attributes of interest.
+//    * ApiResponse: This struct represents the entire API response and is a vector (array) of Feature structs.
+//    * Crashes: This struct represents the attributes related to crashes. 
+//          Each attribute is annotated with serde rename attributes, which specify how the fields should be deserialized from JSON. 
+//          This struct defines the data structure for the crash-related attributes within each feature.
 #[derive(Debug, Deserialize)]
 pub struct Feature {
     pub attributes: Crashes,
