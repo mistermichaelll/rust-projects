@@ -19,7 +19,11 @@ async fn main() -> Result<(), Error> {
 }
 
 fn build_crashes_url() -> String {
-    let mut url = String::from("https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1");
+    let mut url = concat!(
+        "https://maps2.dcgis.dc.gov/",
+        "/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/",
+        "MapServer/24/query?where=1%3D1"
+    ).to_string();
 
     // we can adjust this as-needed, but generally these are the fields I want.
     let field_names: [&str; 33] = [
