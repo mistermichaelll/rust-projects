@@ -1,6 +1,5 @@
-use serde::{Deserialize};
 use reqwest::Error;
-use serde_json::{Value, from_str};
+use serde_json::from_str;
 use open_data_dc::ApiResponse;
 
 #[tokio::main]
@@ -12,7 +11,7 @@ async fn main() -> Result<(), Error> {
         .text()
         .await?;
 
-    let api_response: ApiResponse = serde_json::from_str(&response_text).expect("Failed to parse");
+    let api_response: ApiResponse = from_str(&response_text).expect("Failed to parse");
 
     for feature in api_response.features {
         println!("CRIMEID: {}", feature.attributes.crime_id);
