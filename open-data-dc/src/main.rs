@@ -1,4 +1,3 @@
-use serde::{ Deserialize, Serialize };
 use reqwest;
 use std::fs::write;
 use serde_json::to_vec;
