@@ -9,7 +9,7 @@ use open_data_dc::TotalRecordCount;
 async fn main() -> Result<(), Box<dyn std::error::Error>>{
     let url = build_crashes_url();
     let total_records = get_total_record_count().await?;
-    let mut offset = 1000;
+    let mut offset = 0;
     let rate_limit = 1000;
     let mut records:Vec<Feature> = Vec::new();
 
@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>{
             .json()
             .await?;
 
-        println!("Fetched {} records", offset);
+        println!("Fetched {} records", r.features.len() as i64);
         offset += r.features.len() as i64;
         records.append(&mut r.features)
     }
@@ -89,13 +89,14 @@ fn build_crashes_url() -> String {
 }
 
 async fn get_total_record_count() -> Result<i64, Box<dyn std::error::Error>> {
-    let count_url: &str = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=*&returnCountOnly=true&outSR=4326&f=json";
+    let count_url: &str = &build_crashes_url();
     
     let client = reqwest::Client::builder() 
         .build()?;
 
     let api_response = client 
         .get(count_url)
+        .query(&[("returnCountOnly", "true")])
         .send()
         .await?;
 
