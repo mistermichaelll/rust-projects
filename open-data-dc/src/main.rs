@@ -28,8 +28,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>{
             .json()
             .await?;
 
-        println!("Fetched {} records", r.features.len() as i64);
         offset += r.features.len() as i64;
+        println!("Fetched {} records", offset);
         records.append(&mut r.features)
     }
 
