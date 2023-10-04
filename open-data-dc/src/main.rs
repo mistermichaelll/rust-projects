@@ -1,33 +1,48 @@
-use reqwest::Error;
-use serde_json::from_str;
-// use std::fs::write;
-use open_data_dc::{ ApiResponse, TotalRecordCount };
-
+use serde::{ Deserialize, Serialize };
+use reqwest;
+use std::fs::write;
+use serde_json::to_vec;
+use open_data_dc::ApiResponse;
+use open_data_dc::Feature;
+use open_data_dc::TotalRecordCount;
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>>{
     let url = build_crashes_url();
+    let total_records = get_total_record_count().await?;
+    let mut offset = 1000;
+    let rate_limit = 1000;
+    let mut records:Vec<Feature> = Vec::new();
 
-    let response_text: String = reqwest::get(url)
-        .await?
-        .text()
-        .await?;
+    let client = reqwest::Client::builder()
+        .build()?;
 
-    let api_response: ApiResponse = from_str(&response_text).expect("Failed to parse");
+    println!("{:?} records to fetch.", total_records);
+    while offset < total_records {
+        let api_response = client
+            .get(&url)
+            .query(&[("resultOffset", &offset),("resultRecordCount", &rate_limit)])
+            .send()
+            .await?;
 
-    let json_string = serde_json::to_string(&api_response).expect("Failed to serialize to JSON");
+        let mut r:ApiResponse = api_response
+            .json()
+            .await?;
 
-    // write("output.json", json_string).expect("Failed to write JSON to file");
+        println!("Fetched {} records", offset);
+        offset += r.features.len() as i64;
+        records.append(&mut r.features)
+    }
+
+    let serialized = to_vec(&records)?;
+
+    write("output.json", serialized).expect("Failed to serialized to JSON.");
 
     Ok(())
 }
 
 fn build_crashes_url() -> String {
-    let mut url = concat!(
-        "https://maps2.dcgis.dc.gov/",
-        "/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/",
-        "MapServer/24/query?where=1%3D1"
-    ).to_string();
+    let mut url = String::from("https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1");
 
     // we can adjust this as-needed, but generally these are the fields I want.
     let field_names: [&str; 33] = [
@@ -71,31 +86,23 @@ fn build_crashes_url() -> String {
     url.push_str(&format!("&outfields={}", out_fields));
     url.push_str("&returnGeometry=false&outSR=4326&f=json");
 
-    url
+    return url
 }
 
-fn print_output(a:ApiResponse) {
-    // look at a few of the features of the API Response
-    for feature in a.features {
-        println!("CRIMEID: {}", feature.attributes.crime_id);
-        println!("REPORTDATE: {}", feature.attributes.report_date);
-        println!("ADDRESS: {}", feature.attributes.address);
-        println!("LATITUDE: {}", feature.attributes.latitude);
-        println!("LONGITUDE: {}", feature.attributes.longitude);
-        println!("TOTAL CYCLISTS: {}", feature.attributes.total_bicycles);
-        println!("--------------------------------------------");
-    }
-}
-
-async fn get_total_record_count() -> Result<i64, Error> {
-    let url = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=*&returnCountOnly=true&outSR=4326&f=json";
+async fn get_total_record_count() -> Result<i64, Box<dyn std::error::Error>> {
+    let count_url: &str = "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=*&returnCountOnly=true&outSR=4326&f=json";
     
-    let response_text: String = reqwest::get(url)
-        .await?
-        .text()
+    let client = reqwest::Client::builder() 
+        .build()?;
+
+    let api_response = client 
+        .get(count_url)
+        .send()
         .await?;
 
-    let json_resp: TotalRecordCount = from_str(&response_text).expect("Failed to parse");
-
-    Ok(json_resp.count)
+    let r: TotalRecordCount = api_response 
+        .json::<TotalRecordCount>()
+        .await?;
+    
+    return Ok(r.count);
 }

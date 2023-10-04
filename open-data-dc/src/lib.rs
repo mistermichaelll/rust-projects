@@ -25,21 +25,21 @@ pub struct ApiResponse {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Crashes {
     #[serde(rename = "CRIMEID")]
-    pub crime_id:String,
+    pub crime_id:Option<String>,
     #[serde(rename = "REPORTDATE")]
-    pub report_date:i64,
+    pub report_date:Option<i64>,
     #[serde(rename = "ADDRESS")]
-    pub address:String,
+    pub address:Option<String>,
     #[serde(rename = "LATITUDE")]
-    pub latitude:f64,
+    pub latitude:Option<f64>,
     #[serde(rename = "LONGITUDE")]
-    pub longitude:f64,
+    pub longitude:Option<f64>,
     #[serde(rename = "XCOORD")]
-    pub x_coord:f64,
+    pub x_coord:Option<f64>,
     #[serde(rename = "YCOORD")]
-    pub y_coord:f64,
+    pub y_coord:Option<f64>,
     #[serde(rename = "WARD")]
-    pub ward:String,
+    pub ward:Option<String>,
     #[serde(rename = "MAJORINJURIES_BICYCLIST")]
     pub major_injuries_bicyclist:i64,
     #[serde(rename = "MINORINJURIES_BICYCLIST")]
